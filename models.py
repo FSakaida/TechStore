@@ -24,6 +24,11 @@ class Cliente(db.Model):
 
 class Produto(db.Model):
     __tablename__ = "produtos"
+    __table_args__ = (
+        db.CheckConstraint("preco >= 0", name="ck_produtos_preco_nao_negativo"),
+        db.CheckConstraint("estoque >= 0", name="ck_produtos_estoque_nao_negativo"),
+        db.Index("idx_produtos_nome", "nome"),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(140), nullable=False)
@@ -49,6 +54,10 @@ class Produto(db.Model):
 
 class Pedido(db.Model):
     __tablename__ = "pedidos"
+    __table_args__ = (
+        db.CheckConstraint("total >= 0", name="ck_pedidos_total_nao_negativo"),
+        db.Index("idx_pedidos_cliente", "cliente_id"),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     cliente_id = db.Column(db.Integer, db.ForeignKey("clientes.id"), nullable=False)
@@ -71,6 +80,13 @@ class Pedido(db.Model):
 
 class ItemPedido(db.Model):
     __tablename__ = "itens_pedido"
+    __table_args__ = (
+        db.CheckConstraint("quantidade > 0", name="ck_itens_quantidade_positiva"),
+        db.CheckConstraint(
+            "preco_unitario >= 0", name="ck_itens_preco_nao_negativo"
+        ),
+        db.Index("idx_itens_pedido", "pedido_id"),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     pedido_id = db.Column(

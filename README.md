@@ -17,6 +17,7 @@ use `.env.example` como referência e nunca envie credenciais ao GitHub.
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m flask --app app check-db
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
 .\.venv\Scripts\python.exe -m flask --app app run --debug
 ```
 

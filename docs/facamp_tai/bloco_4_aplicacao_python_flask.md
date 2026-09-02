@@ -35,6 +35,7 @@ O layout, os templates visuais e o CSS existentes foram preservados. Somente o c
 | `static/js/script.js` | Interação das telas com as rotas Flask, sem alterar o desenho visual. |
 | `.env.example` | Exemplo de variáveis sem credenciais reais. |
 | `requirements.txt` | Flask, Flask-SQLAlchemy, psycopg, python-dotenv e gunicorn. |
+| `tests/test_smoke.py` | Testes mínimos do catálogo, carrinho, checkout, schema e rollback. |
 
 ## 4. Atendimento aos Requisitos
 
@@ -72,6 +73,7 @@ Na raiz do projeto, execute:
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m flask --app app check-db
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
 .\.venv\Scripts\python.exe -m flask --app app run --debug
 ```
 
@@ -92,7 +94,9 @@ O Bloco 4 estará concluído quando:
 - uma compra acima do estoque for recusada;
 - nenhuma credencial aparecer no repositório ou nos logs.
 
-Testes automatizados, evidências de rollback e revisão aprofundada de segurança pertencem ao Bloco 5.
+Resultado da verificação local: seis testes aprovados, mapeamento das cinco tabelas confirmado e banco preservado com zero pedidos e zero itens de teste.
+
+Foram incluídos testes mínimos para proteger a integração feita nesta etapa. A ampliação da suíte, as evidências formais de rollback e a revisão aprofundada de segurança pertencem ao Bloco 5.
 
 ## 9. Fontes
 

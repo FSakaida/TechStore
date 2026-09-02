@@ -71,7 +71,8 @@ def validar_dados_checkout(dados):
     return DadosCheckout(**valores)
 
 
-def criar_pedido(carrinho, dados):
+def criar_pedido(carrinho, dados, sessao=None):
+    sessao = sessao if sessao is not None else db.session
     produtos_ids = sorted(int(produto_id) for produto_id in carrinho)
     comando = (
         select(Produto)
@@ -79,13 +80,13 @@ def criar_pedido(carrinho, dados):
         .order_by(Produto.id)
         .with_for_update()
     )
-    produtos = db.session.scalars(comando).all()
+    produtos = sessao.scalars(comando).all()
     produtos_por_id = {produto.id: produto for produto in produtos}
 
     if len(produtos_por_id) != len(produtos_ids):
         raise CheckoutError("Um dos produtos do carrinho não existe mais.")
 
-    cliente = db.session.scalar(
+    cliente = sessao.scalar(
         select(Cliente).where(func.lower(Cliente.email) == dados.email)
     )
     if cliente is None:
@@ -95,7 +96,7 @@ def criar_pedido(carrinho, dados):
             telefone=dados.telefone,
             senha_hash=generate_password_hash(secrets.token_urlsafe(32)),
         )
-        db.session.add(cliente)
+        sessao.add(cliente)
     else:
         cliente.nome = dados.nome
         cliente.telefone = dados.telefone
@@ -110,7 +111,7 @@ def criar_pedido(carrinho, dados):
         endereco=dados.endereco,
         numero=dados.numero,
     )
-    db.session.add(pedido)
+    sessao.add(pedido)
 
     total = Decimal("0.00")
     for produto_id in produtos_ids:
@@ -133,5 +134,5 @@ def criar_pedido(carrinho, dados):
         )
 
     pedido.total = total
-    db.session.flush()
+    sessao.flush()
     return pedido.id
