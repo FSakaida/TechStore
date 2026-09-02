@@ -28,6 +28,7 @@ class Produto(db.Model):
         db.CheckConstraint("preco >= 0", name="ck_produtos_preco_nao_negativo"),
         db.CheckConstraint("estoque >= 0", name="ck_produtos_estoque_nao_negativo"),
         db.Index("idx_produtos_nome", "nome"),
+        db.Index("idx_produtos_categoria", "categoria_id"),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -65,7 +66,7 @@ class Pedido(db.Model):
     total = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     cep = db.Column(db.String(12), nullable=False)
     cidade = db.Column(db.String(100), nullable=False)
-    estado = db.Column(db.String(2), nullable=False)
+    estado = db.Column(db.CHAR(2), nullable=False)
     endereco = db.Column(db.String(180), nullable=False)
     numero = db.Column(db.String(20), nullable=False)
     criado_em = db.Column(

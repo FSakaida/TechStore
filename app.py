@@ -5,6 +5,7 @@ from pathlib import Path
 import click
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, session
+from flask_migrate import Migrate
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
@@ -49,6 +50,7 @@ app.config.update(
     MAX_CONTENT_LENGTH=16 * 1024,
 )
 db.init_app(app)
+migrate = Migrate(app, db, compare_type=True)
 
 
 def listar_produtos():
