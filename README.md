@@ -60,3 +60,20 @@ Variáveis reconhecidas:
 Se `SECRET_KEY` não estiver definida durante o desenvolvimento, o aplicativo
 gera uma chave temporária a cada inicialização. Para o deploy, configure uma
 chave permanente no provedor.
+
+## Deploy no Render
+
+O arquivo `render.yaml` configura um Web Service Python gratuito na região da
+Virgínia, com deploy automático da branch `main` e Gunicorn como servidor de
+produção. O Render gera a `SECRET_KEY` e solicita apenas o valor secreto de
+`DATABASE_URL` durante a criação do Blueprint.
+
+1. Envie as alterações para a branch `main` no GitHub.
+2. No Render, escolha **New > Blueprint** e conecte o repositório `TechStore`.
+3. Confirme que o Blueprint encontrado é `render.yaml`.
+4. Em `DATABASE_URL`, informe a URL pooled da branch `production` do Neon.
+5. Aplique o Blueprint e acompanhe o primeiro deploy.
+
+Não use `DATABASE_URL_UNPOOLED` na aplicação e nunca grave a URL de conexão no
+repositório. O endpoint `/` é usado pelo Render para verificar simultaneamente
+se a aplicação e o catálogo no Neon estão disponíveis.
