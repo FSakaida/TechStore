@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout | TechStore{% endblock %}
+{% block page %}checkout{% endblock %}
+
+{% block content %}
+<section class="page-heading container">
+    <p class="eyebrow">Finalização</p>
+    <h1>Checkout</h1>
+    <p>Informe os dados do cliente para concluir o pedido.</p>
+</section>
+
+<section class="container checkout-layout">
+    <form class="checkout-form" data-checkout-form>
+        <div class="form-card">
+            <div class="card-title">
+                <span>1</span>
+                <h2>Dados do cliente</h2>
+            </div>
+
+            <div class="form-grid">
+                <label class="field field-full">
+                    <span>Nome completo</span>
+                    <input type="text" name="nome" autocomplete="name" required>
+                </label>
+
+                <label class="field">
+                    <span>E-mail</span>
+                    <input type="email" name="email" autocomplete="email" required>
+                </label>
+
+                <label class="field">
+                    <span>Telefone</span>
+                    <input type="tel" name="telefone" autocomplete="tel" placeholder="(11) 99999-9999" required>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="card-title">
+                <span>2</span>
+                <h2>Endereço de entrega</h2>
+            </div>
+
+            <div class="form-grid">
+                <label class="field">
+                    <span>CEP</span>
+                    <input type="text" name="cep" autocomplete="postal-code" placeholder="00000-000" required>
+                </label>
+
+                <label class="field">
+                    <span>Cidade</span>
+                    <input type="text" name="cidade" autocomplete="address-level2" required>
+                </label>
+
+                <label class="field field-full">
+                    <span>Endereço</span>
+                    <input type="text" name="endereco" autocomplete="street-address" required>
+                </label>
+
+                <label class="field">
+                    <span>Número</span>
+                    <input type="text" name="numero" required>
+                </label>
+
+                <label class="field">
+                    <span>Estado</span>
+                    <select name="estado" autocomplete="address-level1" required>
+                        <option value="">Selecione</option>
+                        <option>SP</option>
+                        <option>RJ</option>
+                        <option>MG</option>
+                        <option>PR</option>
+                        <option>SC</option>
+                        <option>RS</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <button class="button primary full" type="submit">Confirmar pedido</button>
+        <p class="form-note">Este protótipo não realiza cobranças reais.</p>
+    </form>
+
+    <aside class="summary-card checkout-summary">
+        <h2>Seu pedido</h2>
+        <div data-checkout-items></div>
+        <div class="summary-row summary-total">
+            <span>Total</span>
+            <strong data-checkout-total>R$ 0,00</strong>
+        </div>
+    </aside>
+</section>
+{% endblock %}

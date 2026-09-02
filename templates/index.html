@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Produtos | TechStore{% endblock %}
+{% block page %}catalogo{% endblock %}
+
+{% block content %}
+<section class="catalog-heading">
+    <div class="container">
+        <p class="eyebrow">Catálogo</p>
+        <h1>Produtos para estudar e trabalhar melhor</h1>
+        <p>Escolha os produtos e adicione-os ao carrinho.</p>
+    </div>
+</section>
+
+<section class="container product-section" aria-labelledby="product-title">
+    <div class="section-heading">
+        <h2 id="product-title">Todos os produtos</h2>
+        <span>6 produtos</span>
+    </div>
+    <div class="product-grid" data-product-grid></div>
+</section>
+{% endblock %}

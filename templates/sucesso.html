@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Pedido confirmado | TechStore{% endblock %}
+{% block page %}sucesso{% endblock %}
+
+{% block content %}
+<section class="success-section container">
+    <div class="success-card">
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <p class="eyebrow">Pedido confirmado</p>
+        <h1>Compra realizada com sucesso</h1>
+        <p>Recebemos o seu pedido e enviaremos as próximas informações por e-mail.</p>
+
+        <div class="order-number">
+            <span>Número do pedido</span>
+            <strong data-order-number>#000000</strong>
+        </div>
+
+        <a class="button primary" href="{{ url_for('catalogo') }}">Voltar ao catálogo</a>
+    </div>
+</section>
+{% endblock %}
