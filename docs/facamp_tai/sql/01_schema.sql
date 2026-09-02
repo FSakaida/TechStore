@@ -1,6 +1,6 @@
 -- Bloco 3 - Estrutura física do banco
 -- Baseado no Bloco 2: Cliente, Categoria, Produto, Pedido e ItemPedido.
-
+-- Já executado na base de dados do Neon!
 CREATE TABLE IF NOT EXISTS categorias (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(80) NOT NULL UNIQUE

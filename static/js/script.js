@@ -1,36 +1,50 @@
-const PRODUCTS = [
-    { id: 1, name: "Notebook Lenovo", category: "Computadores", price: 3499.90, icon: "NB", color: "blue" },
-    { id: 2, name: "Mouse Logitech", category: "Acessórios", price: 129.90, icon: "MS", color: "orange" },
-    { id: 3, name: "Teclado Mecânico", category: "Acessórios", price: 299.90, icon: "TC", color: "purple" },
-    { id: 4, name: "Monitor 24 polegadas", category: "Monitores", price: 899.90, icon: "MN", color: "green" },
-    { id: 5, name: "Headset USB", category: "Áudio", price: 219.90, icon: "HS", color: "red" },
-    { id: 6, name: "Webcam Full HD", category: "Vídeo", price: 189.90, icon: "WC", color: "cyan" }
-];
+const PRODUCT_COLORS = ["blue", "orange", "purple", "green", "red", "cyan"];
+let PRODUCTS = [];
+let cart = [];
 
-const CART_KEY = "techstore_cart";
+function readProducts() {
+    const element = document.querySelector("#products-data");
+    if (!element) return [];
 
-function readCart() {
     try {
-        return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+        return JSON.parse(element.textContent);
     } catch {
         return [];
     }
 }
 
-function saveCart(cart) {
-    localStorage.setItem(CART_KEY, JSON.stringify(cart));
-    updateCartCount();
+function productById(id) {
+    return PRODUCTS.find((product) => product.id === id);
+}
+
+function productInitials(name) {
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join("");
+}
+
+function productColor(product) {
+    return PRODUCT_COLORS[(product.id - 1) % PRODUCT_COLORS.length];
+}
+
+function escapeHtml(value) {
+    const element = document.createElement("span");
+    element.textContent = String(value);
+    return element.innerHTML;
 }
 
 function money(value) {
-    return value.toLocaleString("pt-BR", {
+    return Number(value).toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL"
     });
 }
 
 function cartQuantity() {
-    return readCart().reduce((total, item) => total + item.quantity, 0);
+    return cart.reduce((total, item) => total + item.quantity, 0);
 }
 
 function updateCartCount() {
@@ -45,29 +59,44 @@ function showToast(message) {
 
     toast.textContent = message;
     toast.classList.add("show");
-    window.setTimeout(() => toast.classList.remove("show"), 2200);
+    window.setTimeout(() => toast.classList.remove("show"), 2600);
 }
 
-function addToCart(productId) {
-    const cart = readCart();
-    const existing = cart.find((item) => item.id === productId);
+async function requestJson(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        }
+    });
+    const data = await response.json().catch(() => ({}));
 
-    if (existing) {
-        existing.quantity += 1;
-    } else {
-        cart.push({ id: productId, quantity: 1 });
+    if (!response.ok) {
+        throw new Error(data.erro || "Não foi possível concluir a operação.");
     }
+    return data;
+}
 
-    saveCart(cart);
+async function loadCart() {
+    const data = await requestJson("/api/carrinho");
+    cart = data.itens;
+    updateCartCount();
+}
+
+async function addToCart(productId) {
+    const data = await requestJson(`/api/carrinho/itens/${productId}`, {
+        method: "POST",
+        body: JSON.stringify({ quantidade: 1 })
+    });
+    cart = data.itens;
+    updateCartCount();
+    renderCatalog();
     showToast("Produto adicionado ao carrinho.");
 }
 
-function productById(id) {
-    return PRODUCTS.find((product) => product.id === id);
-}
-
-function calculateTotal(cart) {
-    return cart.reduce((total, item) => {
+function calculateTotal(items) {
+    return items.reduce((total, item) => {
         const product = productById(item.id);
         return product ? total + product.price * item.quantity : total;
     }, 0);
@@ -77,41 +106,60 @@ function renderCatalog() {
     const grid = document.querySelector("[data-product-grid]");
     if (!grid) return;
 
-    grid.innerHTML = PRODUCTS.map((product) => `
-        <article class="product-card">
-            <div class="product-visual ${product.color}" aria-hidden="true">
-                <span>${product.icon}</span>
+    if (PRODUCTS.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-state">
+                <span aria-hidden="true">0</span>
+                <h2>Nenhum produto disponível</h2>
+                <p>O catálogo ainda não possui produtos cadastrados.</p>
             </div>
-            <div class="product-info">
-                <p class="product-category">${product.category}</p>
-                <h3>${product.name}</h3>
-                <p class="product-price">${money(product.price)}</p>
-                <button class="button primary full" type="button" data-add-product="${product.id}">
-                    Adicionar ao carrinho
-                </button>
-            </div>
-        </article>
-    `).join("");
+        `;
+        return;
+    }
 
-    grid.addEventListener("click", (event) => {
-        const button = event.target.closest("[data-add-product]");
-        if (button) addToCart(Number(button.dataset.addProduct));
-    });
+    grid.innerHTML = PRODUCTS.map((product) => {
+        const cartItem = cart.find((item) => item.id === product.id);
+        const atLimit = (cartItem?.quantity || 0) >= product.stock;
+        const unavailable = product.stock <= 0 || atLimit;
+        const buttonText = product.stock <= 0 ? "Sem estoque" : "Adicionar ao carrinho";
+
+        return `
+            <article class="product-card">
+                <div class="product-visual ${productColor(product)}" aria-hidden="true">
+                    <span>${escapeHtml(productInitials(product.name))}</span>
+                </div>
+                <div class="product-info">
+                    <p class="product-category">${escapeHtml(product.category)} · ${product.stock} em estoque</p>
+                    <h3>${escapeHtml(product.name)}</h3>
+                    <p class="product-price">${money(product.price)}</p>
+                    <button class="button primary full${unavailable ? " disabled" : ""}"
+                            type="button"
+                            data-add-product="${product.id}"
+                            ${unavailable ? "disabled" : ""}>
+                        ${buttonText}
+                    </button>
+                </div>
+            </article>
+        `;
+    }).join("");
 }
 
-function changeQuantity(productId, change) {
-    const cart = readCart();
-    const item = cart.find((cartItem) => cartItem.id === productId);
-    if (!item) return;
-
-    item.quantity += change;
-    const updatedCart = cart.filter((cartItem) => cartItem.quantity > 0);
-    saveCart(updatedCart);
+async function changeQuantity(productId, change) {
+    const data = await requestJson(`/api/carrinho/itens/${productId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ alteracao: change })
+    });
+    cart = data.itens;
+    updateCartCount();
     renderCart();
 }
 
-function removeFromCart(productId) {
-    saveCart(readCart().filter((item) => item.id !== productId));
+async function removeFromCart(productId) {
+    const data = await requestJson(`/api/carrinho/itens/${productId}`, {
+        method: "DELETE"
+    });
+    cart = data.itens;
+    updateCartCount();
     renderCart();
     showToast("Produto removido do carrinho.");
 }
@@ -120,7 +168,6 @@ function renderCart() {
     const container = document.querySelector("[data-cart-items]");
     if (!container) return;
 
-    const cart = readCart();
     const checkoutLink = document.querySelector("[data-checkout-link]");
 
     if (cart.length === 0) {
@@ -140,16 +187,16 @@ function renderCart() {
 
             return `
                 <article class="cart-item">
-                    <div class="mini-visual ${product.color}" aria-hidden="true">${product.icon}</div>
+                    <div class="mini-visual ${productColor(product)}" aria-hidden="true">${escapeHtml(productInitials(product.name))}</div>
                     <div class="cart-item-info">
-                        <p>${product.category}</p>
-                        <h2>${product.name}</h2>
+                        <p>${escapeHtml(product.category)}</p>
+                        <h2>${escapeHtml(product.name)}</h2>
                         <strong>${money(product.price)}</strong>
                     </div>
-                    <div class="quantity-control" aria-label="Quantidade de ${product.name}">
+                    <div class="quantity-control" aria-label="Quantidade de ${escapeHtml(product.name)}">
                         <button type="button" data-change="-1" data-product-id="${product.id}" aria-label="Diminuir quantidade">−</button>
                         <span>${item.quantity}</span>
-                        <button type="button" data-change="1" data-product-id="${product.id}" aria-label="Aumentar quantidade">+</button>
+                        <button type="button" data-change="1" data-product-id="${product.id}" aria-label="Aumentar quantidade" ${item.quantity >= product.stock ? "disabled" : ""}>+</button>
                     </div>
                     <button class="remove-button" type="button" data-remove="${product.id}">Remover</button>
                 </article>
@@ -161,25 +208,38 @@ function renderCart() {
     const total = calculateTotal(cart);
     document.querySelector("[data-subtotal]").textContent = money(total);
     document.querySelector("[data-total]").textContent = money(total);
+}
 
-    container.onclick = (event) => {
+function bindCartEvents() {
+    const container = document.querySelector("[data-cart-items]");
+    if (!container) return;
+
+    container.addEventListener("click", async (event) => {
         const quantityButton = event.target.closest("[data-change]");
         const removeButton = event.target.closest("[data-remove]");
 
-        if (quantityButton) {
-            changeQuantity(Number(quantityButton.dataset.productId), Number(quantityButton.dataset.change));
+        try {
+            if (quantityButton) {
+                quantityButton.disabled = true;
+                await changeQuantity(
+                    Number(quantityButton.dataset.productId),
+                    Number(quantityButton.dataset.change)
+                );
+            } else if (removeButton) {
+                removeButton.disabled = true;
+                await removeFromCart(Number(removeButton.dataset.remove));
+            }
+        } catch (error) {
+            showToast(error.message);
+            renderCart();
         }
-        if (removeButton) {
-            removeFromCart(Number(removeButton.dataset.remove));
-        }
-    };
+    });
 }
 
 function renderCheckout() {
     const container = document.querySelector("[data-checkout-items]");
     if (!container) return;
 
-    const cart = readCart();
     if (cart.length === 0) {
         window.location.href = "/carrinho";
         return;
@@ -190,23 +250,39 @@ function renderCheckout() {
         if (!product) return "";
         return `
             <div class="checkout-item">
-                <span>${item.quantity} × ${product.name}</span>
+                <span>${item.quantity} × ${escapeHtml(product.name)}</span>
                 <strong>${money(product.price * item.quantity)}</strong>
             </div>
         `;
     }).join("");
 
     document.querySelector("[data-checkout-total]").textContent = money(calculateTotal(cart));
+}
 
+function bindCheckoutForm() {
     const form = document.querySelector("[data-checkout-form]");
-    form.addEventListener("submit", (event) => {
+    if (!form) return;
+
+    form.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (!form.reportValidity()) return;
 
-        const orderNumber = String(Date.now()).slice(-6);
-        sessionStorage.setItem("techstore_order", orderNumber);
-        localStorage.removeItem(CART_KEY);
-        window.location.href = "/sucesso";
+        const button = form.querySelector("button[type='submit']");
+        button.disabled = true;
+
+        try {
+            const dados = Object.fromEntries(new FormData(form).entries());
+            const response = await requestJson("/api/checkout", {
+                method: "POST",
+                body: JSON.stringify(dados)
+            });
+            sessionStorage.setItem("techstore_order", String(response.pedido_id));
+            cart = [];
+            window.location.href = "/sucesso";
+        } catch (error) {
+            showToast(error.message);
+            button.disabled = false;
+        }
     });
 }
 
@@ -216,10 +292,34 @@ function renderSuccess() {
     element.textContent = `#${sessionStorage.getItem("techstore_order") || "000001"}`;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    updateCartCount();
+document.addEventListener("DOMContentLoaded", async () => {
+    PRODUCTS = readProducts();
+    localStorage.removeItem("techstore_cart");
+
+    try {
+        await loadCart();
+    } catch (error) {
+        showToast(error.message);
+    }
+
     renderCatalog();
     renderCart();
+    bindCartEvents();
     renderCheckout();
+    bindCheckoutForm();
     renderSuccess();
+
+    const grid = document.querySelector("[data-product-grid]");
+    grid?.addEventListener("click", async (event) => {
+        const button = event.target.closest("[data-add-product]");
+        if (!button) return;
+
+        button.disabled = true;
+        try {
+            await addToCart(Number(button.dataset.addProduct));
+        } catch (error) {
+            showToast(error.message);
+            renderCatalog();
+        }
+    });
 });

@@ -1,6 +1,6 @@
 -- Bloco 3 - Consultas de validação
 -- Use estas consultas como evidência de que o banco foi criado corretamente.
-
+-- Já executado!!
 -- 1. Produtos com categoria para validar catálogo.
 SELECT
   p.id,

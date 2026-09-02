@@ -1,6 +1,6 @@
 -- Bloco 3 - Carga inicial de dados
 -- Dados fictícios para demonstrar catálogo, carrinho, pedido e estoque.
-
+-- Já executado na base Neon!
 INSERT INTO categorias (nome)
 VALUES
   ('Tecnologia'),

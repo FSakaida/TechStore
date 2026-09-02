@@ -1,7 +1,7 @@
 -- Bloco 3 - Testes de constraints
 -- Execute depois de 01_schema.sql e 02_seed.sql.
 -- O resultado esperado são mensagens NOTICE iniciadas por "OK".
-
+-- Testes realziados com sucesso!
 DO $$
 DECLARE
   v_categoria_id INTEGER;
