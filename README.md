@@ -5,6 +5,7 @@ MVP acadêmico de e-commerce com Flask, SQLAlchemy e PostgreSQL no Neon.
 ## Requisitos
 
 - Python 3.10 ou superior;
+- Node.js 20 ou superior, usado pela CLI e pela configuração do Neon;
 - projeto Neon do Bloco 3;
 - `DATABASE_URL` em `.env.local`.
 
@@ -26,6 +27,27 @@ Acesse `http://127.0.0.1:5000`.
 Não execute `init-db`: as tabelas e os dados iniciais já foram criados pelos
 scripts do Bloco 3. O comando `check-db` apenas confere a conexão e conta os
 registros existentes.
+
+## Executar no macOS
+
+O Python não cria ambientes virtuais em caminhos que contêm `:`. Como a pasta
+`Facul 2026:2` contém esse caractere, crie o ambiente fora do projeto:
+
+```bash
+python3 -m venv "$HOME/.venvs/techstore"
+"$HOME/.venvs/techstore/bin/python" -m pip install -r requirements.txt
+npm install
+npx --yes neon@latest auth
+npx --yes neon@latest link
+"$HOME/.venvs/techstore/bin/python" -m flask --app app check-db
+"$HOME/.venvs/techstore/bin/python" -m unittest discover -s tests -v
+"$HOME/.venvs/techstore/bin/python" -m flask --app app run --debug
+```
+
+No `neon link`, selecione o projeto `techstore-facamp-tai` e a branch
+`production`. O comando cria `.neon` e `.env.local`, ambos ignorados pelo Git.
+Se o projeto for movido para um caminho sem `:`, também é possível usar uma
+`.venv` dentro dele normalmente.
 
 ## Configuração
 

@@ -1,0 +1,9 @@
+{
+  "name": "techstore",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dependências de desenvolvimento para a configuração do Neon.",
+  "devDependencies": {
+    "@neon/config": "^1.2.0"
+  }
+}
