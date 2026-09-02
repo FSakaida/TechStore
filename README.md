@@ -1,14 +1,19 @@
-# TechStore — frontend do e-commerce
+# TechStore
 
-## Para abrir no Mac
+Frontend simples de um e-commerce desenvolvido com Flask, HTML, CSS e JavaScript.
 
-No terminal do VS Code, dentro desta pasta, execute:
+## Executar
 
-```mkdir -p ~/ambientes_python
-python3 -m venv ~/ambientes_python/techstore
+Dentro da pasta do projeto, execute:
+
+```bash
 source ~/ambientes_python/techstore/bin/activate
 python3 -m pip install -r requirements.txt
 python3 app.py
 ```
 
-Abra `http://127.0.0.1:5000` no navegador.
+Depois, acesse:
+
+```text
+http://127.0.0.1:5000
+```
