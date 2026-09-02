@@ -54,6 +54,7 @@ db.init_app(app)
 def listar_produtos():
     comando = (
         select(Produto)
+        .where(Produto.estoque > 0)
         .options(joinedload(Produto.categoria))
         .order_by(Produto.id)
     )

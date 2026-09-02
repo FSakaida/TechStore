@@ -77,3 +77,14 @@ produção. O Render gera a `SECRET_KEY` e solicita apenas o valor secreto de
 Não use `DATABASE_URL_UNPOOLED` na aplicação e nunca grave a URL de conexão no
 repositório. O endpoint `/` é usado pelo Render para verificar simultaneamente
 se a aplicação e o catálogo no Neon estão disponíveis.
+
+## Evidências acadêmicas
+
+- [DER do modelo TechStore](docs/facamp_tai/der_techstore.svg);
+- [scripts SQL e consultas de validação](docs/facamp_tai/sql);
+- [roteiro para coletar evidências do checkout](docs/facamp_tai/evidencias/README.md);
+- [procedimento de backup e observabilidade](docs/facamp_tai/backup_e_observabilidade.md).
+
+O catálogo exibe somente produtos com estoque positivo. O checkout de
+demonstração deve usar dados fictícios: ele grava cliente, pedido e itens no
+Neon e reduz o estoque de forma permanente.

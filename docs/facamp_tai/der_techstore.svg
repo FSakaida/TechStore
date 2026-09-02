@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="850" viewBox="0 0 1400 850" role="img" aria-labelledby="title description">
+  <title id="title">Diagrama Entidade-Relacionamento do TechStore</title>
+  <desc id="description">Modelo com Cliente, Pedido, ItemPedido, Produto e Categoria. Cliente possui pedidos; pedido possui itens; cada item referencia um produto; cada produto pertence a uma categoria.</desc>
+  <style>
+    .bg { fill: #f7fafc; }
+    .title { fill: #102a43; font: 700 31px Arial, sans-serif; }
+    .subtitle { fill: #486581; font: 16px Arial, sans-serif; }
+    .entity { fill: #ffffff; stroke: #486581; stroke-width: 2; }
+    .head { fill: #0b5f8a; }
+    .head-alt { fill: #8a4b08; }
+    .head-green { fill: #2f855a; }
+    .head-purple { fill: #6b46c1; }
+    .name { fill: #ffffff; font: 700 21px Arial, sans-serif; text-anchor: middle; }
+    .field { fill: #243b53; font: 15px Arial, sans-serif; }
+    .key { fill: #0b5f8a; font: 700 14px Arial, sans-serif; }
+    .relation { stroke: #334e68; stroke-width: 3; fill: none; }
+    .cardinality { fill: #102a43; font: 700 18px Arial, sans-serif; }
+    .legend { fill: #486581; font: 14px Arial, sans-serif; }
+  </style>
+
+  <rect class="bg" width="1400" height="850"/>
+  <text class="title" x="60" y="58">TechStore — Diagrama Entidade-Relacionamento</text>
+  <text class="subtitle" x="60" y="86">MVP acadêmico: catálogo, carrinho em sessão, checkout, pedidos e controle de estoque</text>
+
+  <!-- Categoria 1:N Produto -->
+  <path class="relation" d="M 620 236 H 725"/>
+  <text class="cardinality" x="638" y="224">1</text>
+  <text class="cardinality" x="704" y="224">N</text>
+
+  <g transform="translate(355,140)">
+    <rect class="entity" width="265" height="193" rx="10"/>
+    <rect class="head-green" width="265" height="48" rx="10"/>
+    <rect class="head-green" y="34" width="265" height="14"/>
+    <text class="name" x="132" y="32">Categoria</text>
+    <text class="key" x="20" y="78">PK</text><text class="field" x="52" y="78">id : INTEGER</text>
+    <line x1="18" y1="92" x2="247" y2="92" stroke="#d9e2ec"/>
+    <text class="key" x="20" y="120">UQ</text><text class="field" x="52" y="120">nome : VARCHAR(80)</text>
+    <text class="legend" x="20" y="159">Uma categoria agrupa produtos.</text>
+  </g>
+
+  <g transform="translate(725,105)">
+    <rect class="entity" width="325" height="263" rx="10"/>
+    <rect class="head" width="325" height="48" rx="10"/>
+    <rect class="head" y="34" width="325" height="14"/>
+    <text class="name" x="162" y="32">Produto</text>
+    <text class="key" x="20" y="78">PK</text><text class="field" x="52" y="78">id : INTEGER</text>
+    <line x1="18" y1="92" x2="307" y2="92" stroke="#d9e2ec"/>
+    <text class="field" x="20" y="120">nome : VARCHAR(140)</text>
+    <text class="field" x="20" y="148">descricao : TEXT</text>
+    <text class="field" x="20" y="176">preco : NUMERIC(10,2) [≥ 0]</text>
+    <text class="field" x="20" y="204">estoque : INTEGER [≥ 0]</text>
+    <text class="key" x="20" y="232">FK</text><text class="field" x="52" y="232">categoria_id → categorias.id</text>
+  </g>
+
+  <!-- Cliente 1:N Pedido -->
+  <path class="relation" d="M 365 573 H 470"/>
+  <text class="cardinality" x="383" y="561">1</text>
+  <text class="cardinality" x="449" y="561">N</text>
+
+  <!-- Pedido 1:N ItemPedido -->
+  <path class="relation" d="M 815 573 H 905"/>
+  <text class="cardinality" x="834" y="561">1</text>
+  <text class="cardinality" x="882" y="561">N</text>
+
+  <!-- Produto 1:N ItemPedido -->
+  <path class="relation" d="M 888 368 V 438"/>
+  <text class="cardinality" x="868" y="395">1</text>
+  <text class="cardinality" x="868" y="426">N</text>
+
+  <g transform="translate(60,430)">
+    <rect class="entity" width="305" height="287" rx="10"/>
+    <rect class="head-purple" width="305" height="48" rx="10"/>
+    <rect class="head-purple" y="34" width="305" height="14"/>
+    <text class="name" x="152" y="32">Cliente</text>
+    <text class="key" x="20" y="78">PK</text><text class="field" x="52" y="78">id : INTEGER</text>
+    <line x1="18" y1="92" x2="287" y2="92" stroke="#d9e2ec"/>
+    <text class="field" x="20" y="120">nome : VARCHAR(120)</text>
+    <text class="key" x="20" y="148">UQ</text><text class="field" x="52" y="148">email : VARCHAR(160)</text>
+    <text class="field" x="20" y="176">telefone : VARCHAR(20)</text>
+    <text class="field" x="20" y="204">senha_hash : VARCHAR(255)</text>
+    <text class="legend" x="20" y="248">Um cliente pode realizar vários pedidos.</text>
+  </g>
+
+  <g transform="translate(470,398)">
+    <rect class="entity" width="345" height="350" rx="10"/>
+    <rect class="head-alt" width="345" height="48" rx="10"/>
+    <rect class="head-alt" y="34" width="345" height="14"/>
+    <text class="name" x="172" y="32">Pedido</text>
+    <text class="key" x="20" y="78">PK</text><text class="field" x="52" y="78">id : INTEGER</text>
+    <line x1="18" y1="92" x2="327" y2="92" stroke="#d9e2ec"/>
+    <text class="key" x="20" y="120">FK</text><text class="field" x="52" y="120">cliente_id → clientes.id</text>
+    <text class="field" x="20" y="148">status : VARCHAR(30) = CRIADO</text>
+    <text class="field" x="20" y="176">total : NUMERIC(10,2) [≥ 0]</text>
+    <text class="field" x="20" y="204">cep, cidade, estado</text>
+    <text class="field" x="20" y="232">endereco, numero</text>
+    <text class="field" x="20" y="260">criado_em : TIMESTAMPTZ</text>
+    <text class="legend" x="20" y="305">Cabeçalho da compra e endereço informado.</text>
+  </g>
+
+  <g transform="translate(905,438)">
+    <rect class="entity" width="370" height="250" rx="10"/>
+    <rect class="head" width="370" height="48" rx="10"/>
+    <rect class="head" y="34" width="370" height="14"/>
+    <text class="name" x="185" y="32">ItemPedido</text>
+    <text class="key" x="20" y="78">PK</text><text class="field" x="52" y="78">id : INTEGER</text>
+    <line x1="18" y1="92" x2="352" y2="92" stroke="#d9e2ec"/>
+    <text class="key" x="20" y="120">FK</text><text class="field" x="52" y="120">pedido_id → pedidos.id</text>
+    <text class="key" x="20" y="148">FK</text><text class="field" x="52" y="148">produto_id → produtos.id</text>
+    <text class="field" x="20" y="176">quantidade : INTEGER [&gt; 0]</text>
+    <text class="field" x="20" y="204">preco_unitario : NUMERIC(10,2) [≥ 0]</text>
+  </g>
+
+  <text class="legend" x="60" y="804">Legenda: PK = chave primária · FK = chave estrangeira · UQ = valor único · linhas indicam cardinalidades.</text>
+</svg>
