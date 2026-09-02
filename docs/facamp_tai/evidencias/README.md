@@ -21,4 +21,5 @@ MVP. Use apenas dados fictícios durante o checkout de demonstração.
 - Guarde a consulta SQL utilizada ao lado da captura para que a evidência seja
   reproduzível.
 
-O registro do teste final publicado ficará neste diretório após sua execução.
+O registro do teste final publicado está em
+[checkout_publicado_2026-09-02.md](checkout_publicado_2026-09-02.md).
