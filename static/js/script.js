@@ -293,6 +293,10 @@ function renderSuccess() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+    if (document.body.dataset.page === "apresentacao") {
+        return;
+    }
+
     PRODUCTS = readProducts();
     localStorage.removeItem("techstore_cart");
 

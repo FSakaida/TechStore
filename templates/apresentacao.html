@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Apresentação | TechStore{% endblock %}
+{% block page %}apresentacao{% endblock %}
+
+{% block content %}
+<section class="presentation-hero">
+    <div class="container presentation-hero-content">
+        <div>
+            <p class="eyebrow">FACAMP TAI</p>
+            <h1>TechStore: do requisito ao deploy cloud</h1>
+            <p>
+                Síntese objetiva da entrega: problema, modelagem, PostgreSQL,
+                Flask, transações, testes, segurança, deploy e desafio de login.
+            </p>
+        </div>
+        <div class="presentation-snapshot" aria-label="Resumo do projeto">
+            <span>6 blocos</span>
+            <span>RF01-RF06</span>
+            <span>5 tabelas</span>
+            <span>8 testes</span>
+        </div>
+    </div>
+</section>
+
+<section class="container presentation-section">
+    <div class="section-heading">
+        <h2>Escopo Implementado</h2>
+        <span>HTML inicial como referência principal</span>
+    </div>
+    <div class="project-flow" aria-label="Fluxo principal do MVP">
+        <span>Catálogo</span>
+        <span>Carrinho</span>
+        <span>Checkout</span>
+        <span>Pedido</span>
+        <span>Estoque</span>
+        <span>Histórico</span>
+    </div>
+</section>
+
+<section class="container presentation-section">
+    <div class="section-heading">
+        <h2>Blocos do Projeto</h2>
+        <span>ordem do material</span>
+    </div>
+    <div class="block-grid">
+        <article class="presentation-card">
+            <span class="block-number">1</span>
+            <h3>Problema e requisitos</h3>
+            <p>Escopo do MVP, atores, RF01 a RF06, RNFs, backlog e limites: sem pagamento real nem logística.</p>
+        </article>
+        <article class="presentation-card">
+            <span class="block-number">2</span>
+            <h3>Modelagem conceitual e lógica</h3>
+            <p>DER com Cliente, Categoria, Produto, Pedido e ItemPedido; cardinalidades, 3FN e dicionário de dados.</p>
+        </article>
+        <article class="presentation-card">
+            <span class="block-number">3</span>
+            <h3>PostgreSQL em cloud</h3>
+            <p>Banco Neon `production`, tabelas, chaves, constraints, índices, seed e SQLs de validação.</p>
+        </article>
+        <article class="presentation-card">
+            <span class="block-number">4</span>
+            <h3>Aplicação Flask</h3>
+            <p>Catálogo vindo do Neon, carrinho em sessão, checkout, ORM SQLAlchemy e API de pedidos.</p>
+        </article>
+        <article class="presentation-card">
+            <span class="block-number">5</span>
+            <h3>Transações, testes e segurança</h3>
+            <p>Checkout com `FOR UPDATE`, commit/rollback, testes automatizados, hash de senha e segredos fora do código.</p>
+        </article>
+        <article class="presentation-card">
+            <span class="block-number">6</span>
+            <h3>Deploy e atividade prática</h3>
+            <p>GitHub, Render Blueprint, Gunicorn, variáveis de ambiente e evidência de checkout publicado.</p>
+        </article>
+    </div>
+</section>
+
+<section class="container presentation-section">
+    <div class="section-heading">
+        <h2>Matriz de Aderência</h2>
+        <span>exigência → evidência</span>
+    </div>
+    <div class="evidence-table" role="table" aria-label="Matriz de aderência do projeto">
+        <div role="row">
+            <strong>RF01</strong>
+            <span>Catálogo lista produtos reais do PostgreSQL com preço, categoria e estoque.</span>
+        </div>
+        <div role="row">
+            <strong>RF02/RF03</strong>
+            <span>Carrinho em sessão permite adicionar, alterar, remover e recalcular total.</span>
+        </div>
+        <div role="row">
+            <strong>RF04/RF05</strong>
+            <span>Checkout cria pedido e itens, baixa estoque e bloqueia compra acima do disponível.</span>
+        </div>
+        <div role="row">
+            <strong>RF06</strong>
+            <span>Pedidos ficam ligados ao cliente e podem ser vistos em “Meus pedidos”.</span>
+        </div>
+        <div role="row">
+            <strong>Banco</strong>
+            <span>Schema físico tem PK, FK, UNIQUE, NOT NULL, CHECK e índices planejados.</span>
+        </div>
+        <div role="row">
+            <strong>Deploy</strong>
+            <span>Render configurado por `render.yaml`; Neon guarda o PostgreSQL em cloud.</span>
+        </div>
+    </div>
+</section>
+
+<section class="container presentation-section">
+    <div class="architecture-band" aria-label="Arquitetura da solução">
+        <div>
+            <span>GitHub</span>
+            <small>versionamento</small>
+        </div>
+        <div>
+            <span>Render</span>
+            <small>Flask + Gunicorn</small>
+        </div>
+        <div>
+            <span>SQLAlchemy</span>
+            <small>ORM e transações</small>
+        </div>
+        <div>
+            <span>Neon</span>
+            <small>PostgreSQL cloud</small>
+        </div>
+    </div>
+</section>
+
+<section class="container presentation-section">
+    <div class="spotlight-layout">
+        <article class="presentation-card spotlight-card">
+            <p class="eyebrow">Desafio de extensão</p>
+            <h2>Autenticação e histórico do cliente</h2>
+            <p>
+                Foram adicionados cadastro, login, logout, alteração de senha e
+                área “Meus pedidos”. A extensão usa `clientes.email`,
+                `clientes.senha_hash` e `pedidos.cliente_id`, sem mudar o schema.
+            </p>
+        </article>
+        <article class="presentation-card">
+            <h3>Testes e evidências</h3>
+            <ul class="presentation-list">
+                <li>8 testes automatizados aprovados.</li>
+                <li>SQLs de constraints com respostas esperadas.</li>
+                <li>DER salvo em `docs/facamp_tai`.</li>
+                <li>Checkout publicado validado em 02/09/2026.</li>
+                <li>URL pública registrada: techstore-facamp-tai.onrender.com.</li>
+            </ul>
+        </article>
+    </div>
+</section>
+
+<section class="container presentation-section">
+    <div class="section-heading">
+        <h2>Entregáveis Conferidos</h2>
+        <span>repositório e documentação</span>
+    </div>
+    <div class="deliverable-grid">
+        <span>Guia-mãe operacional</span>
+        <span>Blocos 1 a 4 documentados</span>
+        <span>SQLs do Bloco 3</span>
+        <span>DER TechStore</span>
+        <span>README com execução e deploy</span>
+        <span>Render Blueprint</span>
+        <span>Evidência de checkout</span>
+        <span>Desafio de login</span>
+    </div>
+</section>
+{% endblock %}

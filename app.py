@@ -172,6 +172,11 @@ def sucesso():
     return render_template("sucesso.html", produtos=[])
 
 
+@app.get("/apresentacao")
+def apresentacao():
+    return render_template("apresentacao.html", produtos=[])
+
+
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
     erro = None

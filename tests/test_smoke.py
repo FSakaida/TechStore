@@ -37,13 +37,18 @@ class TechStoreSmokeTest(unittest.TestCase):
 
     def test_paginas_e_catalogo(self):
         with app.test_client() as cliente_http:
-            for caminho in ("/", "/carrinho", "/checkout", "/sucesso"):
+            for caminho in ("/", "/carrinho", "/checkout", "/sucesso", "/apresentacao"):
                 resposta = cliente_http.get(caminho)
                 self.assertEqual(resposta.status_code, 200, caminho)
 
             catalogo = cliente_http.get("/").get_data(as_text=True)
             self.assertIn("products-data", catalogo)
             self.assertIn('"stock"', catalogo)
+
+            apresentacao = cliente_http.get("/apresentacao").get_data(as_text=True)
+            self.assertIn("TechStore: do requisito ao deploy cloud", apresentacao)
+            self.assertIn("RF01-RF06", apresentacao)
+            self.assertIn("Autenticação e histórico do cliente", apresentacao)
 
     def test_carrinho_em_sessao(self):
         with app.test_client() as cliente_http:
