@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from sqlalchemy import func, inspect, select
 from sqlalchemy.orm import Session
+from werkzeug.security import generate_password_hash
 
 from app import app
 from checkout_service import DadosCheckout, criar_pedido
@@ -166,6 +167,134 @@ class TechStoreSmokeTest(unittest.TestCase):
         produto_restaurado = db.session.get(Produto, self.produto_id)
         self.assertIsNone(cliente_persistido)
         self.assertEqual(produto_restaurado.estoque, self.estoque_inicial)
+
+    def test_cadastro_cria_cliente_e_abre_historico(self):
+        email_teste = f"cadastro-{uuid.uuid4().hex}@example.com"
+
+        conexao = db.engine.connect()
+        transacao = conexao.begin()
+        sessao_teste = Session(
+            bind=conexao,
+            join_transaction_mode="create_savepoint",
+        )
+        try:
+            with patch("app.db.session", sessao_teste):
+                with app.test_client() as cliente_http:
+                    resposta = cliente_http.post(
+                        "/cadastro",
+                        data={
+                            "nome": "Cliente Cadastro",
+                            "email": email_teste,
+                            "telefone": "(11) 97777-6666",
+                            "senha": "senha123",
+                            "confirmar_senha": "senha123",
+                        },
+                        follow_redirects=True,
+                    )
+                    self.assertEqual(resposta.status_code, 200)
+                    self.assertIn("Meus pedidos", resposta.get_data(as_text=True))
+                    self.assertIsNotNone(
+                        sessao_teste.scalar(
+                            select(Cliente).where(Cliente.email == email_teste)
+                        )
+                    )
+        finally:
+            sessao_teste.close()
+            transacao.rollback()
+            conexao.close()
+
+    def test_login_cadastro_historico_e_alteracao_de_senha(self):
+        email_teste = f"login-{uuid.uuid4().hex}@example.com"
+
+        conexao = db.engine.connect()
+        transacao = conexao.begin()
+        sessao_teste = Session(
+            bind=conexao,
+            join_transaction_mode="create_savepoint",
+        )
+        try:
+            cliente = Cliente(
+                nome="Cliente Login",
+                email=email_teste,
+                telefone="(11) 98888-7777",
+                senha_hash=generate_password_hash("senha123"),
+            )
+            sessao_teste.add(cliente)
+            sessao_teste.flush()
+            pedido_id = criar_pedido(
+                {str(self.produto_id): 1},
+                DadosCheckout(
+                    nome=cliente.nome,
+                    email=cliente.email,
+                    telefone=cliente.telefone,
+                    cep="13000-000",
+                    cidade="Campinas",
+                    estado="SP",
+                    endereco="Rua de Teste",
+                    numero="100",
+                ),
+                sessao=sessao_teste,
+                cliente_id=cliente.id,
+            )
+            sessao_teste.commit()
+
+            with patch("app.db.session", sessao_teste):
+                with app.test_client() as cliente_http:
+                    resposta = cliente_http.get("/meus-pedidos")
+                    self.assertEqual(resposta.status_code, 302)
+                    self.assertIn("/login", resposta.headers["Location"])
+
+                    resposta = cliente_http.post(
+                        "/login",
+                        data={"email": email_teste, "senha": "errada"},
+                        follow_redirects=True,
+                    )
+                    self.assertEqual(resposta.status_code, 200)
+                    self.assertIn(
+                        "E-mail ou senha inválidos.",
+                        resposta.get_data(as_text=True),
+                    )
+
+                    resposta = cliente_http.post(
+                        "/login",
+                        data={"email": email_teste, "senha": "senha123"},
+                        follow_redirects=True,
+                    )
+                    self.assertEqual(resposta.status_code, 200)
+                    pagina = resposta.get_data(as_text=True)
+                    self.assertIn("Meus pedidos", pagina)
+                    self.assertIn(f"Pedido #{pedido_id}", pagina)
+
+                    resposta = cliente_http.post(
+                        "/alterar-senha",
+                        data={
+                            "senha_atual": "senha123",
+                            "nova_senha": "nova456",
+                            "confirmar_senha": "nova456",
+                        },
+                        follow_redirects=True,
+                    )
+                    self.assertEqual(resposta.status_code, 200)
+                    self.assertIn(
+                        "Senha alterada com sucesso.",
+                        resposta.get_data(as_text=True),
+                    )
+
+                    cliente_http.post("/logout", follow_redirects=True)
+                    resposta = cliente_http.post(
+                        "/login",
+                        data={"email": email_teste, "senha": "nova456"},
+                        follow_redirects=True,
+                    )
+                    self.assertEqual(resposta.status_code, 200)
+                    self.assertIn(
+                        f"Pedido #{pedido_id}",
+                        resposta.get_data(as_text=True),
+                    )
+        finally:
+            sessao_teste.close()
+            transacao.rollback()
+            conexao.close()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Entrar | TechStore{% endblock %}
+{% block page %}login{% endblock %}
+
+{% block content %}
+<section class="page-heading container">
+    <p class="eyebrow">Cliente</p>
+    <h1>Entrar</h1>
+    <p>Acesse sua conta para consultar seus pedidos.</p>
+</section>
+
+<section class="container account-layout">
+    <form class="checkout-form account-form" method="post">
+        <div class="form-card">
+            <div class="card-title">
+                <span>1</span>
+                <h2>Dados de acesso</h2>
+            </div>
+
+            {% if erro %}
+                <p class="form-alert">{{ erro }}</p>
+            {% endif %}
+
+            <div class="form-grid">
+                <label class="field field-full">
+                    <span>E-mail</span>
+                    <input type="email" name="email" autocomplete="email" required>
+                </label>
+
+                <label class="field field-full">
+                    <span>Senha</span>
+                    <input type="password" name="senha" autocomplete="current-password" required>
+                </label>
+            </div>
+        </div>
+
+        <button class="button primary full" type="submit">Entrar</button>
+        <a class="text-link" href="{{ url_for('cadastro') }}">Criar conta ou definir senha</a>
+    </form>
+</section>
+{% endblock %}

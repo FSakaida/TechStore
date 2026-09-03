@@ -4,12 +4,18 @@ from pathlib import Path
 
 import click
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request, session
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from flask_migrate import Migrate
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 
+from auth_service import (
+    AuthError,
+    alterar_senha_cliente,
+    autenticar_cliente,
+    cadastrar_ou_atualizar_cliente,
+)
 from checkout_service import (
     CheckoutError,
     EstoqueInsuficienteError,
@@ -120,6 +126,29 @@ def erro_json(mensagem, status):
     return jsonify({"erro": mensagem}), status
 
 
+def cliente_logado():
+    cliente_id = session.get("cliente_id")
+    if cliente_id is None:
+        return None
+    try:
+        return db.session.get(Cliente, int(cliente_id))
+    except (TypeError, ValueError):
+        session.pop("cliente_id", None)
+        return None
+
+
+def exigir_login():
+    cliente = cliente_logado()
+    if cliente is None:
+        return None, redirect(url_for("login", proximo=request.path))
+    return cliente, None
+
+
+@app.context_processor
+def contexto_autenticacao():
+    return {"cliente_logado": cliente_logado()}
+
+
 @app.get("/")
 def catalogo():
     produtos = listar_produtos()
@@ -133,12 +162,114 @@ def carrinho():
 
 @app.get("/checkout")
 def checkout():
-    return render_template("checkout.html", produtos=listar_produtos())
+    return render_template(
+        "checkout.html", produtos=listar_produtos(), cliente=cliente_logado()
+    )
 
 
 @app.get("/sucesso")
 def sucesso():
     return render_template("sucesso.html", produtos=[])
+
+
+@app.route("/cadastro", methods=["GET", "POST"])
+def cadastro():
+    erro = None
+    if request.method == "POST":
+        try:
+            with db.session.begin():
+                cliente = cadastrar_ou_atualizar_cliente(request.form, db.session)
+            session["cliente_id"] = cliente.id
+            return redirect(url_for("meus_pedidos"))
+        except AuthError as exc:
+            erro = str(exc)
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception("Falha de banco ao cadastrar cliente")
+            erro = "Não foi possível concluir o cadastro."
+
+    return render_template("cadastro.html", produtos=[], erro=erro)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    erro = None
+    proximo = request.args.get("proximo") or url_for("meus_pedidos")
+
+    if request.method == "POST":
+        try:
+            cliente = autenticar_cliente(
+                request.form.get("email"), request.form.get("senha"), db.session
+            )
+            session["cliente_id"] = cliente.id
+            destino = (
+                proximo
+                if proximo.startswith("/") and not proximo.startswith("//")
+                else url_for("meus_pedidos")
+            )
+            return redirect(destino)
+        except AuthError as exc:
+            erro = str(exc)
+
+    return render_template("login.html", produtos=[], erro=erro)
+
+
+@app.post("/logout")
+def logout():
+    session.pop("cliente_id", None)
+    return redirect(url_for("catalogo"))
+
+
+@app.get("/meus-pedidos")
+def meus_pedidos():
+    cliente, resposta = exigir_login()
+    if resposta is not None:
+        return resposta
+
+    pedidos = db.session.scalars(
+        select(Pedido)
+        .where(Pedido.cliente_id == cliente.id)
+        .options(joinedload(Pedido.itens).joinedload(ItemPedido.produto))
+        .order_by(Pedido.criado_em.desc())
+    ).unique().all()
+    return render_template(
+        "meus_pedidos.html", produtos=[], cliente=cliente, pedidos=pedidos
+    )
+
+
+@app.route("/alterar-senha", methods=["GET", "POST"])
+def alterar_senha():
+    cliente, resposta = exigir_login()
+    if resposta is not None:
+        return resposta
+
+    erro = None
+    sucesso_senha = False
+    if request.method == "POST":
+        try:
+            alterar_senha_cliente(
+                cliente,
+                request.form.get("senha_atual"),
+                request.form.get("nova_senha"),
+                request.form.get("confirmar_senha"),
+            )
+            db.session.commit()
+            sucesso_senha = True
+        except AuthError as exc:
+            db.session.rollback()
+            erro = str(exc)
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception("Falha de banco ao alterar senha")
+            erro = "Não foi possível alterar a senha."
+
+    return render_template(
+        "alterar_senha.html",
+        produtos=[],
+        cliente=cliente,
+        erro=erro,
+        sucesso_senha=sucesso_senha,
+    )
 
 
 @app.get("/api/carrinho")
@@ -213,7 +344,12 @@ def finalizar_checkout():
     try:
         dados_checkout = validar_dados_checkout(request.get_json(silent=True))
         with db.session.begin():
-            pedido_id = criar_pedido(carrinho_atual, dados_checkout)
+            cliente = cliente_logado()
+            pedido_id = criar_pedido(
+                carrinho_atual,
+                dados_checkout,
+                cliente_id=cliente.id if cliente else None,
+            )
     except EstoqueInsuficienteError as erro:
         return erro_json(str(erro), 409)
     except CheckoutError as erro:

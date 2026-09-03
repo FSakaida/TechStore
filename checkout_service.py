@@ -71,7 +71,7 @@ def validar_dados_checkout(dados):
     return DadosCheckout(**valores)
 
 
-def criar_pedido(carrinho, dados, sessao=None):
+def criar_pedido(carrinho, dados, sessao=None, cliente_id=None):
     sessao = sessao if sessao is not None else db.session
     produtos_ids = sorted(int(produto_id) for produto_id in carrinho)
     comando = (
@@ -86,9 +86,14 @@ def criar_pedido(carrinho, dados, sessao=None):
     if len(produtos_por_id) != len(produtos_ids):
         raise CheckoutError("Um dos produtos do carrinho não existe mais.")
 
-    cliente = sessao.scalar(
-        select(Cliente).where(func.lower(Cliente.email) == dados.email)
-    )
+    cliente = sessao.get(Cliente, cliente_id) if cliente_id is not None else None
+    if cliente_id is not None and cliente is None:
+        raise CheckoutError("Cliente autenticado não encontrado.")
+
+    if cliente is None:
+        cliente = sessao.scalar(
+            select(Cliente).where(func.lower(Cliente.email) == dados.email)
+        )
     if cliente is None:
         cliente = Cliente(
             nome=dados.nome,

@@ -18,6 +18,14 @@
 
             <nav class="main-nav" aria-label="Navegação principal">
                 <a href="{{ url_for('catalogo') }}">Produtos</a>
+                {% if cliente_logado %}
+                    <a href="{{ url_for('meus_pedidos') }}">Meus pedidos</a>
+                    <form class="nav-form" action="{{ url_for('logout') }}" method="post">
+                        <button type="submit">Sair</button>
+                    </form>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Entrar</a>
+                {% endif %}
                 <a class="cart-link" href="{{ url_for('carrinho') }}">
                     Carrinho
                     <span class="cart-count" data-cart-count>0</span>

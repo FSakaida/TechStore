@@ -82,6 +82,7 @@ se a aplicação e o catálogo no Neon estão disponíveis.
 
 - [DER do modelo TechStore](docs/facamp_tai/der_techstore.svg);
 - [scripts SQL e consultas de validação](docs/facamp_tai/sql);
+- [desafio de login e histórico do cliente](docs/facamp_tai/desafio_login_historico_cliente.md);
 - [roteiro para coletar evidências do checkout](docs/facamp_tai/evidencias/README.md);
 - [procedimento de backup e observabilidade](docs/facamp_tai/backup_e_observabilidade.md).
 

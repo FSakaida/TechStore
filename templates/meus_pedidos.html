@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Meus pedidos | TechStore{% endblock %}
+{% block page %}meus-pedidos{% endblock %}
+
+{% block content %}
+<section class="page-heading container">
+    <p class="eyebrow">Cliente</p>
+    <h1>Meus pedidos</h1>
+    <p>Histórico vinculado ao e-mail autenticado.</p>
+</section>
+
+<section class="container orders-layout">
+    <aside class="summary-card">
+        <h2>{{ cliente.nome }}</h2>
+        <div class="summary-row">
+            <span>E-mail</span>
+            <strong>{{ cliente.email }}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Pedidos</span>
+            <strong>{{ pedidos|length }}</strong>
+        </div>
+        <a class="button primary full" href="{{ url_for('alterar_senha') }}">Alterar senha</a>
+    </aside>
+
+    <div class="orders-list">
+        {% if pedidos %}
+            {% for pedido in pedidos %}
+                <article class="order-card">
+                    <div class="order-card-header">
+                        <div>
+                            <p class="product-category">Pedido #{{ pedido.id }}</p>
+                            <h2>{{ pedido.status }}</h2>
+                        </div>
+                        <strong>R$ {{ "%.2f"|format(pedido.total)|replace(".", ",") }}</strong>
+                    </div>
+
+                    <div class="order-items">
+                        {% for item in pedido.itens %}
+                            <div class="checkout-item">
+                                <span>{{ item.quantidade }} x {{ item.produto.nome }}</span>
+                                <strong>R$ {{ "%.2f"|format(item.preco_unitario * item.quantidade)|replace(".", ",") }}</strong>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </article>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <span aria-hidden="true">0</span>
+                <h2>Nenhum pedido encontrado</h2>
+                <p>Finalize uma compra para visualizar o histórico nesta área.</p>
+                <a class="button primary" href="{{ url_for('catalogo') }}">Ver produtos</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
