@@ -7,6 +7,7 @@ Create Date: 2026-09-02 20:35:48.541061
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import inspect
 
 
 # revision identifiers, used by Alembic.
@@ -17,6 +18,28 @@ depends_on = None
 
 
 def upgrade():
+    bind = op.get_bind()
+    existing_tables = set(inspect(bind).get_table_names())
+    expected_tables = {
+        "categorias",
+        "clientes",
+        "produtos",
+        "pedidos",
+        "itens_pedido",
+    }
+
+    # The schema may have been created before Alembic was introduced.
+    # Let Alembic stamp this revision without destroying existing data.
+    if expected_tables.issubset(existing_tables):
+        return
+
+    if existing_tables.intersection(expected_tables):
+        missing_tables = sorted(expected_tables - existing_tables)
+        raise RuntimeError(
+            "Schema parcialmente criado; tabelas ausentes: "
+            + ", ".join(missing_tables)
+        )
+
     op.create_table(
         "categorias",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
